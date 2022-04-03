@@ -1,0 +1,2 @@
+- [numtostring](https://www.educative.io/edpresso/how-to-convert-an-int-to-a-string-in-cpp)
+- [ternary operators](https://www.freecodecamp.org/news/c-ternary-operator/)
