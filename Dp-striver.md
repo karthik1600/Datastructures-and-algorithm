@@ -318,3 +318,143 @@ int mazeObstacles(int n, int m, vector<vector<int> > &maze){
 }
 
 ```
+---
+
+>`We are given an “N*M” matrix of integers. We need to find a path from the top-left corner to the bottom-right corner of the matrix, such that there is a minimum cost past that we select.At every cell, we can move in only two directions: right and bottom. The cost of a path is given as the sum of values of cells of the given matrix.`
+tabulation
+```cpp
+int minSumPath(int n, int m, vector<vector<int> > &matrix){
+    vector<vector<int> > dp(n,vector<int>(m,0));
+    for(int i=0; i<n ; i++){
+        for(int j=0; j<m; j++){
+            if(i==0 && j==0) dp[i][j] = matrix[i][j];
+            else{
+                
+                int up = matrix[i][j];
+                if(i>0) up += dp[i-1][j];
+                else up += 1e9;
+                
+                int left = matrix[i][j];
+                if(j>0) left+=dp[i][j-1];
+                else left += 1e9;
+                
+                dp[i][j] = min(up,left);
+            }
+        }
+    }
+    
+    return dp[n-1][m-1];
+    
+}
+
+```
+space optimization
+```cpp
+int minSumPath(int n, int m, vector<vector<int> > &matrix){
+      vector<int> prev(m,0);
+    for(int i=0; i<n ; i++){
+        vector<int> temp(m,0);
+        for(int j=0; j<m; j++){
+            if(i==0 && j==0) temp[j] = matrix[i][j];
+            else{
+                
+                int up = matrix[i][j];
+                if(i>0) up += prev[j];
+                else up += 1e9;
+                
+                int left = matrix[i][j];
+                if(j>0) left+=temp[j-1];
+                else left += 1e9;
+                
+                temp[j] = min(up,left);
+            }
+        }
+        prev=temp;
+    }
+    
+    return prev[m-1];
+    
+}
+```
+---
+> `We are given an ‘N*M’ matrix. We need to find the maximum path sum from any cell of the first row to any cell of the last row.`
+```cpp
+int getMaxUtil(int i, int j, int m, vector<vector<int>> &matrix, 
+vector<vector<int> > &dp){
+    
+    // Base Conditions
+    if(j<0 || j>=m)
+        return -1e9;
+    if(i==0)
+        return matrix[0][j];
+    
+    if(dp[i][j]!=-1) return dp[i][j];
+    
+    int up = matrix[i][j] + getMaxUtil(i-1,j,m,matrix,dp);
+    int leftDiagonal = matrix[i][j] + getMaxUtil(i-1,j-1,m,matrix,dp);
+    int rightDiagonal = matrix[i][j] + getMaxUtil(i-1,j+1,m,matrix,dp);
+    
+    return dp[i][j]= max(up,max(leftDiagonal,rightDiagonal));
+    
+}
+
+int getMaxPathSum(vector<vector<int> > &matrix){
+    
+    int n = matrix.size();
+    int m = matrix[0].size();
+    
+    vector<vector<int>> dp(n,vector<int>(m,-1));
+    
+    int maxi = INT_MIN;
+    
+    for(int j=0; j<m;j++){
+        int ans = getMaxUtil(n-1,j,m,matrix,dp);
+        maxi = max(maxi,ans);
+    }
+    
+    return maxi;
+}
+```
+tabulation
+```cpp
+int getMaxPathSum(vector<vector<int> > &matrix){
+    
+    int n = matrix.size();
+    int m = matrix[0].size();
+    
+    vector<vector<int>> dp(n,vector<int>(m,0));
+    
+    // Initializing first row - base condition
+    for(int j=0; j<m; j++){
+        dp[0][j] = matrix[0][j];
+    }
+    
+    for(int i=1; i<n; i++){
+        for(int j=0;j<m;j++){
+            
+            int up = matrix[i][j] + dp[i-1][j];
+            
+            int leftDiagonal= matrix[i][j];
+            if(j-1>=0) leftDiagonal += dp[i-1][j-1];
+            else leftDiagonal += -1e9;
+            
+            int rightDiagonal = matrix[i][j];
+            if(j+1<m) rightDiagonal += dp[i-1][j+1];
+            else rightDiagonal += -1e9;
+            
+            dp[i][j] = max(up, max(leftDiagonal,rightDiagonal));
+            
+        }
+    }
+    
+    int maxi = INT_MIN;
+    
+    for(int j=0; j<m;j++){
+        maxi = max(maxi,dp[n-1][j]);
+    }
+    
+    return maxi;
+}
+```
+- can further be space optimized
+---
