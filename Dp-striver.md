@@ -599,3 +599,813 @@ int maximumChocolates(int n, int m, vector < vector < int >> & grid) {
 
 }
 ```
+
+---
+# `subset sum`
+```cpp
+int Solution::solve(vector<int> &arr, int k) {
+    int n=arr.size();
+     vector < vector < bool >> dp(n + 1, vector < bool > (k + 1,false));
+
+    // If required price = 0, answer always true.
+    for (int i = 0; i <= n; i++) {
+        dp[i][0] = true;
+    }
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= k; j++) {
+           bool not_take = dp[i - 1][j];
+           bool take=false;
+            if (arr[i - 1] <= j) {
+                t =dp[i - 1][j - arr[i - 1]];
+            }
+            dp[i][j]=take|not_take;
+        }
+    }
+
+    return dp[n][k];
+}
+```
+---
+# `equal subset sum`
+```cpp
+bool canPartition(vector<int> &arr, int n)
+{
+    int sum=0;
+	for(int a:arr)sum+=a;
+    if(sum%2==1)return false;
+    sum=sum/2;
+    vector<vector<bool>> dp(n+1,vector<bool>(sum+1,false));
+    for(int i=0;i<=n;i++)dp[i][0]=true;
+    for(int i=1;i<=n;i++){
+        for(int target=1;target<=sum;target++){
+            bool not_take=dp[i-1][target];
+            bool take=false;
+            if(arr[i-1]<=target){
+                take=dp[i-1][target-arr[i-1]];
+            }
+            dp[i][target]=take|not_take;
+        }
+    }
+    return dp[n][sum];
+}
+```
+---
+
+# `Partition a set into two subsets such that the difference of subset sums is minimum.`
+```cpp
+int minSubsetSumDifference(vector<int>& arr, int n)
+{
+     // take total sum as k
+     int sum=0;
+     for(int a:arr)sum+=a;
+     int k=sum;
+     vector < vector < bool >> dp(n + 1, vector < bool > (k + 1,false));
+   
+    // If required price = 0, answer always true.
+    for (int i = 0; i <= n; i++) {
+        dp[i][0] = true;
+    }
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= k; j++) {
+           bool not_take = dp[i - 1][j];
+           bool take=false;
+            if (arr[i - 1] <= j) {
+                take = dp[i - 1][j - arr[i - 1]];
+            }
+            dp[i][j]=take|not_take;
+        }
+    }
+    int minSum=sum+1;
+    //check what  all numbers are possible too formed using subset
+    for(int i=0;i<=sum;i++){
+        if(dp[n][i]==true){
+            int other =sum-i;
+            int diff = abs(i-other);
+            minSum=min(minSum,diff);
+        }
+    }
+    return minSum;
+}
+```
+---
+# no. of subset to get sum k
+ - `memo`
+```cpp
+int solve(vector<int> &arr, int i, int target ,vector<vector<int>>& dp){
+    if(target==0)return 1; ///// imp //// line 1
+    if(i==0){//line 2
+        if(arr[0]==target)return 1; ///imp////as we only 2 choices here
+        else return 0;
+    }
+    if(dp[i][target]!=-1)return dp[i][target];
+    int not_take=solve(arr,i-1,target,dp);
+    int take=0;
+    if(arr[i]<=target){
+        take=solve(arr,i-1,target-arr[i],dp);
+    }
+    return dp[i][target]=take+not_take;
+}
+int findWays(vector<int> &arr, int k)
+{
+    int n=arr.size();
+    vector<vector<int>> dp(n,vector<int>(k+1,-1));
+    return solve(arr,n-1,k,dp);
+}
+```
+`bottom up approach tabulation`
+```cpp
+int findWays(vector<int> &arr, int k)
+{
+    int n=arr.size();
+    vector<vector<int>> dp(n,vector<int>(k+1,0));
+    for(int i=0;i<n;i++)dp[i][0]=1; //line 1
+    if(arr[0]<=k)dp[0][arr[0]]=1; //line 2 as some numbers may be greater than k
+    for(int i=1;i<n;i++){
+        for(int target=1;target<=k;target++){
+            // copy everything formm memo code and change solve to dp
+            int not_take=dp[i-1][target];
+            int take=0;
+            if(arr[i]<=target){
+                take=dp[i-1][target-arr[i]];
+            }
+            dp[i][target]=take+not_take;
+        }
+    }
+    return dp[n-1][k];
+}
+```
+- to deal with sitations where there are 0s in the array
+```cpp
+int mod=(int)(1e9+7);
+int solve(vector<int> &arr, int i, int target ,vector<vector<int>>& dp){
+//     if(target==0)return 1; //line 1 not needed as there is a probability of 0 being present in the ret of array
+    if(i==0){
+        if(target==0&&arr[0]==0)return 2; // as we can both inc and exclude it to give ans
+        if(arr[0]==target)return 1; //line 2
+        if(target==0)return 1; // as there is a posiblity of subset being equal to target and adding 0 to it doesnt change target
+        else return 0;
+    }
+    if(dp[i][target]!=-1)return dp[i][target];
+    int not_take=solve(arr,i-1,target,dp);
+    int take=0;
+    if(arr[i]<=target){
+        take=solve(arr,i-1,target-arr[i],dp);
+    }
+    return dp[i][target]=(take+not_take);
+}
+```
+`Tabulation`
+```cpp
+   vector<vector<int>> dp(n,vector<int>(target+1,0));
+    if(arr[0]==0)dp[0][0]=2;
+    else dp[0][0]=1;
+    if(arr[0]!=0&&target>=arr[0]){
+        dp[0][arr[0]]=1;
+    }
+    for(int i=1;i<n;i++){
+        for(int j=0;j<=target;j++){
+            int not_take=dp[i-1][j];
+            int take=0;
+            if(arr[i]<=j){
+                take=dp[i-1][j-arr[i]];
+            }
+            dp[i][j]=take+not_take;
+        }
+    }
+    return dp[n-1][target];
+```
+
+----
+# `0/1 knapsach`
+```cpp
+int solve(int ind,int currWeight,vector<int> weight, vector<int> value,vector<vector<int>>& dp){
+    if(ind==0){ //as any weight greater than currWeight not possible
+        if(weight[0]<=currWeight)return value[0];
+        else return 0;
+    }
+    if(dp[ind][currWeight]!=-1)return dp[ind][currWeight];
+    int not_take = 0 + solve(ind-1,currWeight,weight,value,dp);
+    int take = INT_MIN;
+    if(currWeight>=weight[ind])take = value[ind] + solve(ind-1,currWeight-weight[ind],weight,value,dp);
+    return dp[ind][currWeight] = max(take,not_take);
+}
+int knapsack(vector<int> weight, vector<int> value, int n, int maxWeight) 
+{
+    vector<vector<int>> dp(n,vector<int>(maxWeight+1,-1));
+	return solve(n-1,maxWeight,weight,value,dp);
+}
+
+```
+`tabulation`
+```cpp
+    vector<vector<int>> dp(n,vector<int>(maxWeight+1,0));
+    for(int i=weight[0];i<=maxWeight;i++)dp[0][i]=value[0]; //line 1 as every weight from weight[0] to max is robbabable
+    for(int ind=1;ind<n;ind++){
+        for(int currWeight=1;currWeight<=maxWeight;currWeight++){
+            int not_take = 0 + dp[ind-1][currWeight];
+            int take = INT_MIN;
+            if(currWeight>=weight[ind])take = value[ind] + dp[ind-1][currWeight-weight[ind]];
+            dp[ind][currWeight] = max(take,not_take);
+          }
+    }
+	return dp[n-1][maxWeight];
+```
+
+---
+# min number of coins to reach a value
+```cpp
+int solve(int ind,int currSum,vector<int> num,vector<vector<int>>& dp){
+    if(ind==0){
+        if(currSum%num[0]==0)return currSum/num[0]; //to check if therem value can be made by first coin or this branch wrong
+        else return 1e9;
+    }
+    if(dp[ind][currSum]!=-1)return dp[ind][currSum];
+    int not_take = 0 +solve(ind-1,currSum,num,dp);
+    int take=INT_MAX;
+    if(currSum>=num[ind]){
+        take=1+solve(ind,currSum-num[ind],num,dp); // no ind-1 as we can use the coin again
+    }
+    return dp[ind][currSum] = min(take,not_take);
+}
+int minimumElements(vector<int> &num, int x)
+{
+    int n=num.size();
+    vector<vector<int>> dp(n,vector<int>(x+1,-1));
+    int ans = solve(n-1,x,num,dp);
+    if(ans>=1e9)return -1;
+    return ans;
+}
+```
+```cpp
+    int n=num.size();
+    vector<vector<int>> dp(n,vector<int>(x+1,0));
+    for(int i=0;i<=x;i++){
+        if(i%num[0]==0)
+        dp[0][i]=i/num[0];
+        else dp[0][i]=1e9;
+    }
+    for(int ind=1;ind<n;ind++){
+        for(int currSum=1;currSum<=x;currSum++){
+                int not_take = 0 +dp[ind-1][currSum];
+                int take=INT_MAX;
+                if(currSum>=num[ind]){
+                    take=1+dp[ind][currSum-num[ind]];
+                }
+                dp[ind][currSum] = min(take,not_take);
+        }
+    }
+    int ans=dp[n-1][x];
+    if(ans>=1e9)return -1;
+    return ans;
+```
+- can optimize the above by using prev[] and curr[] for dp then doing
+- `prev=curr` after one outer loop iteration
+---
+
+# target sum 
+```
+You are given an array ‘ARR’ of ‘N’ integers and a target number, ‘TARGET’. Your task is to build an expression out of an array by adding one of the symbols '+' and '-' before each integer in an array, and then by concatenating all the integers, you want to achieve a target. You have to return the number of ways the target can be achieved.
+```
+```
+You are given the array ‘ARR’ = [1, 1, 1, 1, 1], ‘TARGET’ = 3. The number of ways this target can be achieved is:
+1. -1 + 1 + 1 + 1 + 1 = 3
+2. +1 - 1 + 1 + 1 + 1 = 3
+3. +1 + 1 - 1 + 1 + 1 = 3
+4. +1 + 1 + 1 - 1 + 1 = 3
+5. +1 + 1 + 1 + 1 - 1 = 3
+These are the 5 ways to make. Hence the answer is 5.
+```
+```cpp
+int targetSum(int n, int target, vector<int>& arr) {
+    int t=0;
+    for(int a:arr)t+=a;
+    // nothing but s1-s2=target   total-target /2 => s2  
+    int find=t-target;
+    if(find<0 || find%2 ==1)return false;
+    find=find/2;
+    vector<vector<int>> dp(n,vector<int>(find+1,0));
+    if(arr[0]==0)
+        dp[0][0]=2; //both inc and exc
+    else dp[0][0]=1; //omly exc
+    if(arr[0]!=0&&arr[0]<=find)dp[0][arr[0]]=1;
+    for(int i=1;i<n;i++){
+        for(int j=0;j<=find;j++){
+            int not_take=dp[i-1][j];
+            int take=0;
+            if(arr[i]<=j)
+                take=dp[i-1][j-arr[i]];
+            dp[i][j]=take+not_take;
+        }
+    }
+    return dp[n-1][find];
+}
+
+```
+
+---
+# no of ways we can reach a value given simem coins which can be used infinitely
+```cpp
+long f(int ind,int curr,int* coins,vector<vector<long>>& dp){
+    if(ind==0){
+        if(curr%coins[0]==0)return 1;// to check if we reach the remainng amout
+        else return 0;
+    }
+    if(dp[ind][curr]!=-1)return dp[ind][curr];
+    long not_take=f(ind-1,curr,coins,dp);
+    long take=0;
+    if(coins[ind]<=curr)take=f(ind,curr-coins[ind],coins,dp);// dont change int
+    return dp[ind][curr]=take+not_take;
+}
+long countWaysToMakeChange(int *denominations, int n, int value)
+{
+    vector<vector<long>> dp(n,vector<long>(value+1,-1));
+    
+    return f(n-1,value,denominations,dp);
+}
+```
+---
+# Unbounded knapsack
+```cpp
+//base case
+if(ind==0){
+  int value=((int)(currwt/weight[0])*profit[0])
+  // eg currwt =13 and wt[0]=4 we cann use 4 wts totaling 12 and profit = profit[0]*3
+  return value;
+}
+```
+```cpp
+int unboundedKnapsack(int n, int w, vector<int> &profit, vector<int> &weight)
+{
+    vector<vector<int>> dp(n,vector<int>(w+1,0));
+    for(int i=1;i<=w;i++){ // base case of recursion
+        dp[0][i]=((int)(i/weight[0]))*profit[0];
+    }
+    for(int ind=1;ind<n;ind++){
+        for(int currwt=1;currwt<=w;currwt++){
+            int not_take=dp[ind-1][currwt];
+            int take=0;
+            if(weight[ind]<=currwt)
+                take=profit[ind]+dp[ind][currwt-weight[ind]];//dont change
+            dp[ind][currwt]=max(take,not_take);
+        }
+    }
+    return dp[n-1][w];
+}
+```
+# `Rod Cutting problem`
+```cpp
+int solve(int ind,int currSize,vector<int> price,vector<vector<int>>& dp){
+    if(ind==0){
+        return price[0]*currSize; //there will currSize rods then
+    }
+    if(dp[ind][currSize]!=-1)return dp[ind][currSize];
+    int not_take=0 + solve(ind-1,currSize,price,dp);
+    int take=INT_MIN;
+    int rodLen=ind+1;
+    if(rodLen<=currSize)
+        take=price[ind]+solve(ind,currSize-rodLen,price,dp);
+    return dp[ind][currSize]=max(take,not_take);
+    
+}
+int cutRod(vector<int> &price, int n)
+{
+    vector<vector<int>> dp(n,vector<int>(n+1,-1));
+    return solve(n-1,n,price,dp);
+    
+}
+```
+tab
+```cpp
+    vector<vector<int>> dp(n,vector<int>(n+1,0));
+    for(int i=1;i<=n;i++)dp[0][i]=price[0]*i;
+    for(int ind=1;ind<n;ind++){
+        for(int currSize=1;currSize<=n;currSize++){
+            int not_take=0 + dp[ind-1][currSize];
+            int take=INT_MIN;
+            int rodLen=ind+1;
+            if(rodLen<=currSize)
+                take=price[ind]+dp[ind][currSize-rodLen];
+            dp[ind][currSize]=max(take,not_take);
+        }
+    }
+    return dp[n-1][n];
+```
+---
+# longest common subsequence
+```cpp
+    int solve(int ind1,int ind2,string s1,string s2,vector<vector<int>>& dp){
+        if(ind1<0||ind2<0)return 0; // as neg iind not poss // line 
+        int ans;
+        if(dp[ind1][ind2]!=-1)return dp[ind1][ind2];
+        if(s1[ind1]==s2[ind2]){ 
+            ans=1+solve(ind1-1,ind2-1,s1,s2,dp);
+        }else{
+            int ignore1 = 0+ solve(ind1-1,ind2,s1,s2,dp);//ignore letter of s1
+            int ignore2 = 0 + solve(ind1,ind2-1,s1,s2,dp);//ignore letter of s2
+            ans=max(ignore1,ignore2);
+        }
+        return dp[ind1][ind2]=ans;
+            
+    }
+    int longestCommonSubsequence(string text1, string text2) {
+        vector<vector<int>> dp(text1.size(),vector<int>(text2.size(),-1));
+        return solve(text1.size()-1,text2.size()-1,text1,text2,dp);
+    }
+```
+Tabulation
+```cpp
+      vector<vector<int>> dp(text1.size()+1,vector<int>(text2.size()+1,0));
+      // we move one index left because we need to handle line1
+      for(int i=0;i<=text1.size();i++)dp[i][0]=0; //line1
+      for(int j=0;j<=text2.size();j++)dp[0][j]=0;//line1
+      for(int ind1=1;ind1<=text1.size();ind1++){
+          for(int ind2=1;ind2<=text2.size();ind2++){
+              int ans;
+              if(text1[ind1-1]==text2[ind2-1]){
+                  ans=1+dp[ind1-1][ind2-1];
+              }else{
+                  int ignore1 = 0+ dp[ind1-1][ind2];
+                  int ignore2 = 0 + dp[ind1][ind2-1];
+                  ans=max(ignore1,ignore2);
+              }
+              dp[ind1][ind2]=ans;
+          }
+      }
+      return dp[text1.size()][text2.size()];
+```
+## Printing LCS
+```cpp
+        int i=text1.size(),j=text2.size();
+        string ans;
+        while(i>0 && j>0){
+            if(text1[i-1]==text2[j-1]){
+                ans=text1[i-1]+ans;
+                i--;
+                j--;
+            }else{
+                if(dp[i-1][j]>dp[i][j-1]){
+                    i--;
+                }else{
+                    j--;
+                }
+            }
+        }
+        cout<<ans;
+```
+---
+## Longest common substring
+- same as `Longest Common Subsequence` just chnage the part as shown below
+```cpp
+if(text1[ind1-1]==text2[ind2-1]){
+    ans=1+dp[ind1-1][ind2-1];
+}else{
+  ans=0;
+}
+dp[ind1][ind2]=ans;
+```
+## Longest Palindromic Substring( L P S)
+- same as `Longest Common Subsequence` just keep s1=orignal and s2 = reversed original
+## Minimum insertions to make string palindrome
+- find `L P S` and then `string.size() - L P S;`
+## Minimum number of insertions and deletions to maake A into B
+- number of del = size of A - LCS
+- number of ins = size of B - LCS
+```cpp
+int canYouMake(string &str, string &ptr)
+{
+    int LCS = LongestCommonSubsequence(str,ptr);
+    int number_of_del = str.size() - LCS;
+    int number_of_ins = ptr.size() - LCS;
+    return number_of_del + number_of_ins;
+}
+```
+## shortest Common supersequence 
+```cpp
+    string lcsString(string text1,string text2,vector<vector<int>> dp){ // to create longest common subseq string using LCS table
+        int i=text1.size(),j=text2.size();
+        string ans;
+        while(i>0 && j>0){
+            if(text1[i-1]==text2[j-1]){
+                ans=text1[i-1]+ans;
+                i--;
+                j--;
+            }else{
+                if(dp[i-1][j]>dp[i][j-1]){
+                    i--;
+                }else{
+                    j--;
+                }
+            }
+        }
+        cout<<ans<<endl;
+        return ans;
+    }
+    string lcs(string text1,string text2){ // to gwt lcs table
+      vector<vector<int>> dp(text1.size()+1,vector<int>(text2.size()+1,0));
+      // we move one index left because we need to handle line1
+      for(int i=0;i<=text1.size();i++)dp[i][0]=0; //line1
+      for(int j=0;j<=text2.size();j++)dp[0][j]=0;//line1
+      for(int ind1=1;ind1<=text1.size();ind1++){
+          for(int ind2=1;ind2<=text2.size();ind2++){
+              int ans;
+              if(text1[ind1-1]==text2[ind2-1]){
+                  ans=1+dp[ind1-1][ind2-1];
+              }else{
+                  int ignore1 = 0+ dp[ind1-1][ind2];
+                  int ignore2 = 0 + dp[ind1][ind2-1];
+                  ans=max(ignore1,ignore2);
+              }
+              dp[ind1][ind2]=ans;
+          }
+      }
+      return lcsString(text1,text2,dp);
+    
+    }
+    string shortestCommonSupersequence(string str1, string str2) {
+        int a,b;
+        string lcsubsequence = lcs(str1,str2);
+        int i=str1.size()-1,j=str2.size()-1;
+        int len=lcsubsequence.size()-1;
+        string ans="";
+        while(len>=0){ // for all leters of LCS
+            while(lcsubsequence[len]!=str1[i]){ //as all letters till first occurence of LCS letter
+                ans=str1[i]+ans;
+                i--;
+            }
+            while(lcsubsequence[len]!=str2[j]){ //as all letters are needed till first occurence of lcs letter
+                ans=str2[j]+ans; // need to add any letter before the occurence of lcs letter
+                j--;  
+            }
+            
+            ans=lcsubsequence[len]+ans; //including the lcs letter in ans as this is pos it has to be added
+            len--;
+            i--;
+            j--;
+        }
+        while(i>=0){ //addinng remaining letters left
+            ans=str1[i]+ans;
+            i--;
+        } 
+        while(j>=0){ //adding remaining letters left
+            ans=str2[j]+ans;
+            j--;
+        }
+        return ans;
+        
+    }
+    
+```
+---
+# total number of subsequences --  important phases of dp on strings
+![](img\distinctsubs.png)
+## `first step : Recursion + Memo`
+```cpp
+    double solve(int ind1,int ind2,string s,string t,vector<vector<double>> &dp){
+        //base case
+        if(ind2<0)return 1;//as we used up all char of t
+        if(ind1<0)return 0; // as we have character in t but all char in s used up 
+        if(dp[ind1][ind2]!=-1.0)return dp[ind1][ind2];
+        int ans = 0; 
+        if(s[ind1]==t[ind2]){
+            double not_use_t = solve(ind1-1,ind2,s,t,dp);  // use char from t
+            double use_t = solve(ind1-1,ind2-1,s,t,dp); //not use
+            ans = not_use_t + use_t;
+        }else{
+            //move right to find some other char
+            ans = solve(ind1-1,ind2,s,t,dp);
+        }
+        return dp[ind1][ind2]=ans;
+    }
+    int numDistinct(string s, string t) {
+        int n=s.size();
+        int m=t.size();
+        vector<vector<double>> dp(n,vector<double>(m,-1.0));
+        return (int)solve(n-1,m-1,s,t,dp);
+    }
+```
+
+## `second step : Tabulation` - convert recursion to tabulation
+```cpp
+    int numDistinct(string s, string t) {
+        int n=s.size();
+        int m=t.size();
+        vector<vector<double>> dp(n+1,vector<double>(m+1,0));
+        for(int i=0;i<=n;i++)dp[i][0]=1; //we
+        for(int i=1;i<=m;i++)dp[0][i]=0; // when we have more than equal to 1 t remaining
+        for(int ind1=1;ind1<=n;ind1++){
+            for(int ind2=1;ind2<=m;ind2++){
+                int ans = 0; 
+                if(s[ind1-1]==t[ind2-1]){
+                    double not_use_t = dp[ind1-1][ind2];  // use char from t
+                    double use_t = dp[ind1-1][ind2-1]; //not use
+                    ans = not_use_t + use_t;
+                }else{
+                    //move right to find some other char
+                    ans = dp[ind1-1][ind2];
+                }
+                dp[ind1][ind2]=ans;
+            }
+        }
+        return (int)dp[n][m];
+    }
+```
+## `third step : 2d to 1d space optimization`
+```cpp
+    int numDistinct(string s, string t) {
+        int n=s.size();
+        int m=t.size();
+        // vector<vector<double>> dp(n+1,vector<double>(m+1,0));
+        vector<double> prev(m+1,0),curr(m+1,0);
+        // for(int i=0;i<=n;i++)dp[i][0]=1; //we
+        // for(int i=1;i<=m;i++)dp[0][i]=0; // when we have more than equal to 1 t remaining
+        prev[0]=1,curr[0]=1;
+        for(int i=1;i<=m;i++)prev[i]=0;
+        for(int ind1=1;ind1<=n;ind1++){
+            for(int ind2=1;ind2<=m;ind2++){
+                int ans = 0; 
+                if(s[ind1-1]==t[ind2-1]){
+                    double not_use_t = prev[ind2];  // use char from t
+                    double use_t = prev[ind2-1]; //not use
+                    ans = not_use_t + use_t;
+                }else{
+                    //move right to find some other char
+                    ans = prev[ind2];
+                }
+                curr[ind2]=ans;
+            }
+            prev=curr;
+        }
+        return (unsigned int)prev[m];
+    }
+```
+## `fourth step : optimizing the 1d space further`
+```cpp
+    int numDistinct(string s, string t) {
+        int n=s.size();
+        int m=t.size();
+        // vector<vector<double>> dp(n+1,vector<double>(m+1,0));
+        vector<double> prev(m+1,0);
+        // for(int i=0;i<=n;i++)dp[i][0]=1; //we
+        // for(int i=1;i<=m;i++)dp[0][i]=0; // when we have more than equal to 1 t remaining
+        prev[0]=1;
+        for(int i=1;i<=m;i++)prev[i]=0;
+        for(int ind1=1;ind1<=n;ind1++){
+            for(int ind2=m;ind2>0;ind2--){
+                int ans = 0; 
+                if(s[ind1-1]==t[ind2-1]){
+                    double not_use_t = prev[ind2];  // use char from t
+                    double use_t = prev[ind2-1]; //not use
+                    ans = not_use_t + use_t;
+                }else{
+                    //move right to find some other char
+                    ans = prev[ind2];
+                }
+                prev[ind2]=ans;
+            }
+        }
+        return (unsigned int)prev[m];
+    }
+```
+---
+# Edit distance
+```cpp
+    int solve(int ind1,int ind2,string s1,string s2, vector<vector<int>>& dp){
+        if(ind1<0)return ind2+1; // insert all other characters from s2
+        if(ind2<0)return ind1+1; //delete all other characters from s1 
+        int ans=0;
+        if(dp[ind1][ind2]!=-1)return dp[ind1][ind2];
+        if(s1[ind1]==s2[ind2]){
+            ans = solve(ind1-1,ind2-1,s1,s2,dp);
+        }else{
+            int insert = 1 + solve(ind1,ind2-1,s1,s2,dp);
+            int deletech = 1 + solve(ind1-1,ind2,s1,s2,dp);
+            int replace = 1 + solve(ind1-1,ind2-1,s1,s2,dp);
+            ans=min({insert,deletech,replace});
+        }
+        return dp[ind1][ind2]=ans;
+        
+    }
+    int minDistance(string word1, string word2) {
+        int n=word1.size(),m=word2.size();
+        vector<vector<int>> dp(n,vector<int>(m,-1));
+       return solve(n-1,m-1,word1,word2,dp);
+    }
+```
+# Wildcard Matching
+```cpp
+
+```
+---
+# buy and sell stock 1
+```cpp
+    int maxProfit(vector<int>& nums) {
+        int minsf=nums[0],maxPr=0; // buying and selling on same day
+        for(int i=1;i<nums.size();i++){
+            int cost =nums[i]-minsf;
+            maxPr=max(cost,maxPr);
+            minsf=min(nums[i],minsf);
+        }
+    return maxPr;
+    }
+```
+## `buy and sell stock 2`
+```cpp
+    int solve(int ind,int canBuy,vector<int>& prices,vector<vector<int>> &dp){
+        //base case
+        if(ind==prices.size())return 0;
+        int ans;
+        if(dp[ind][canBuy]!=-1)return dp[ind][canBuy];
+        if(canBuy){ //has to buy now not sell
+            int buy = -prices[ind] + solve(ind+1,0,prices,dp);//set it to cant buy anymore
+            int notBuy = 0 + solve(ind+1,1,prices,dp); //just deciding to not buy now
+            ans = max(buy,notBuy);
+        }else{
+            int sell = prices[ind] + solve(ind+1,1,prices,dp); //set it to can buy
+            int notSell = 0 + solve(ind+1,0,prices,dp); // try selling in future not now
+            ans=max(sell,notSell);
+        }
+        return dp[ind][canBuy]=ans;
+        
+    }
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        vector<vector<int>> dp(n,vector<int>(2,-1));
+        return solve(0,1,prices,dp);
+    }
+```
+`Tabulation`
+```cpp
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        vector<vector<int>> dp(n+1,vector<int>(2,0));
+        for(int i=0;i<=1;i++)dp[n][i]=0; //base case
+        for(int ind=n-1;ind>=0;ind--){
+            for(int canBuy=1;canBuy>=0;canBuy--){
+                int ans;
+                if(canBuy){ //has to buy now not sell
+                    int buy = -prices[ind] + dp[ind+1][0];//set it to cant buy anymore
+                    int notBuy = 0 + dp[ind+1][1]; //just deciding to not buy now
+                    ans = max(buy,notBuy);
+                }else{
+                    int sell = prices[ind] + dp[ind+1][1]; //set it to can buy
+                    int notSell = 0 + dp[ind+1][0]; // try selling in future not now
+                    ans=max(sell,notSell);
+                }
+                dp[ind][canBuy]=ans;
+            }
+        }
+        return dp[0][1];
+    }
+```
+# space optimization
+```cpp
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        vector<vector<int>> dp(n+1,vector<int>(2,0));
+        vector<int> ahead(2,0),curr(2,0);
+        // for(int i=0;i<=1;i++)dp[n][i]=0; //base case
+        ahead[0]=ahead[1]=0;  
+        for(int ind=n-1;ind>=0;ind--){
+            for(int canBuy=1;canBuy>=0;canBuy--){
+                int ans;
+                if(canBuy){ //has to buy now not sell
+                    int buy = -prices[ind] + ahead[0];//set it to cant buy anymore
+                    int notBuy = 0 + ahead[1]; //just deciding to not buy now
+                    ans = max(buy,notBuy);
+                }else{
+                    int sell = prices[ind] + ahead[1]; //set it to can buy
+                    int notSell = 0 + ahead[0]; // try selling in future not now
+                    ans=max(sell,notSell);
+                }
+                curr[canBuy]=ans;
+            }
+            ahead=curr;
+        }
+        return ahead[1];
+    }
+```
+---
+# stock with cooldown of one day after sell
+```cpp
+    int solve(int ind,int canBuy,vector<int>& prices,vector<vector<int>> &dp){
+        //base case
+        if(ind>=prices.size())return 0;
+        if(dp[ind][canBuy]!=-1)return dp[ind][canBuy];
+        int ans;
+        if(canBuy){
+            int buy = -prices[ind]+solve(ind+1,0,prices,dp);
+            int notBuy = 0 + solve(ind+1,1,prices,dp);
+            ans=max(buy,notBuy);
+        }else{
+            int sell = prices[ind]+solve(ind+2,1,prices,dp);
+            int notSell = 0 + solve(ind+1,0,prices,dp);
+            ans=max(sell,notSell);
+        }
+        return dp[ind][canBuy]=ans;
+    }
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        vector<vector<int>> dp(n+1,vector<int>(2,-1));
+        return solve(0,1,prices,dp);
+    }
+```

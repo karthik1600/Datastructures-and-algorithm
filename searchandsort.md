@@ -145,6 +145,86 @@ void quickSortServe(int arr[],int lo,int hi)
 ![](img\quicksort.png)
 
 ---
+# `insertion Sort`
+- for evry i = `1` to `n-1`
+    - key = arr[i]
+    - if arr[i]<arr[j]
+```cpp
+void insertionSort(int arr[], int n)
+{
+    int i, key, j;
+    for (i = 1; i < n; i++)
+    {
+        key = arr[i];
+        j = i - 1;
+ 
+        // Move elements of arr[0..i-1], 
+        // that are greater than key, to one
+        // position ahead of their
+        // current position
+        while (j >= 0 && arr[j] > key)
+        {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+```
+---
+# `selection sort`
+- for every i= 0 to n-2
+    - find min from i to n then swap it with ith pos
+```cpp
+void selectionSort(vector<int>& arr) 
+{ 
+    int i, j, min_idx; 
+  
+    // One by one move boundary of 
+    // unsorted subarray 
+    for (i = 0; i< arr.size()-1; i++) 
+    { 
+        
+        // Find the minimum element in 
+        // unsorted array 
+        min_idx = i; 
+        for (j = i+1; j < n; j++) 
+        if (arr[j] < arr[min_idx]) 
+            min_idx = j; 
+  
+        // Swap the found minimum element 
+        // with the first element 
+        swap(arr[min_idx],arr[i]); 
+    } 
+} 
+```
+---
+# `Bubble sort`
+```cpp
+void bubbleSort(int arr[], int n)
+{
+   int i, j;
+   bool swapped;
+   for (i = 0; i < n-1; i++)
+   {
+     swapped = false;
+     for (j = 0; j < n-i-1; j++)
+     {
+        if (arr[j] > arr[j+1])
+        {
+           swap(arr[j], arr[j+1]);
+           swapped = true;
+        }
+     }
+  
+     // IF no two elements were swapped 
+     // by inner loop, then break
+     if (swapped == false)
+        break;
+   }
+}
+  
+```
 # FIRST AND LAST OCCURENCE OF AN ELE IN SORTED ARRAY
 ```cpp
 int first(int arr[], int x, int n)
